@@ -8,6 +8,8 @@ import {
 import { useApi } from '../hooks/useApi.js'
 import { Alert, PageHeader } from '../components/UI.jsx'
 
+const API_BASE = import.meta.env.VITE_API_URL || ''
+
 const PLATFORMS = {
   facebook: {
     label: 'Facebook',
@@ -15,7 +17,7 @@ const PLATFORMS = {
     color: '#1877F2',
     bg: '#EBF3FF',
     border: '#BDD7FF',
-    connectUrl: '/api/oauth/connect/facebook',
+    connectUrl: `${API_BASE}/api/oauth/connect/facebook`,
     modeWarning: true,
   },
   instagram: {
@@ -24,7 +26,7 @@ const PLATFORMS = {
     color: '#E1306C',
     bg: '#FDEEF4',
     border: '#F9BDD4',
-    connectUrl: '/api/oauth/connect/facebook',
+    connectUrl: `${API_BASE}/api/oauth/connect/instagram`,
     autoConnected: true,
   },
   twitter: {
@@ -33,7 +35,7 @@ const PLATFORMS = {
     color: '#000000',
     bg: '#F0F0F0',
     border: '#CCCCCC',
-    connectUrl: '/api/oauth/connect/twitter',
+    connectUrl: `${API_BASE}/api/oauth/connect/twitter`,
   },
   linkedin: {
     label: 'LinkedIn',
@@ -41,7 +43,7 @@ const PLATFORMS = {
     color: '#0A66C2',
     bg: '#EBF3FB',
     border: '#BDD5F0',
-    connectUrl: '/api/oauth/connect/linkedin',
+    connectUrl: `${API_BASE}/api/oauth/connect/linkedin`,
   },
 }
 
