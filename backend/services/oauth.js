@@ -23,7 +23,7 @@ const config = {
     appSecret: () => process.env.FACEBOOK_APP_SECRET,
     authUrl:   'https://www.facebook.com/v19.0/dialog/oauth',
     tokenUrl:  'https://graph.facebook.com/v19.0/oauth/access_token',
-    scopes:    'pages_manage_posts,pages_read_engagement,pages_show_list,instagram_basic,instagram_content_publish,public_profile,email',
+    scopes: 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,email',
     apiBase:   'https://graph.facebook.com/v19.0',
   },
   twitter: {
