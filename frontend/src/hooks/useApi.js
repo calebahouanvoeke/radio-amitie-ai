@@ -1,7 +1,14 @@
 import { useState, useCallback } from 'react'
 import axios from 'axios'
 
-const api = axios.create({ baseURL: '/api', timeout: 300000 })
+
+const BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api'
+
+const api = axios.create({ baseURL: BASE_URL, timeout: 300000 })
+
+
 
 export function useApi() {
   const [loading, setLoading] = useState(false)
