@@ -28,9 +28,9 @@ async function dispatchPost(post) {
   const results   = {};
 
   for (const platform of platforms) {
-    const connections = db.prepare(
-      "SELECT * FROM social_connections WHERE platform=? AND is_active=1 LIMIT 10"
-    ).all(platform);
+const connections = db.prepare(
+  "SELECT * FROM social_connections WHERE platform=? AND is_active=1 AND account_type='page' LIMIT 10"
+).all(platform);
 
     if (!connections.length) {
       results[platform] = { success: false, error: 'Aucun compte connecté pour ' + platform };
