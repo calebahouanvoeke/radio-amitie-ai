@@ -2,7 +2,6 @@ const express = require('express');
 const router  = express.Router();
 const { v4: uuid } = require('uuid');
 const { fetchNewsArticles, preFilter } = require('../services/rss');
-const { analyzeNewsArticles, generate } = require('../services/groq');
 const { getDb } = require('../db/database');
 
 function getKeywords() {
@@ -10,6 +9,7 @@ function getKeywords() {
   return row ? row.value.split(',').map(s => s.trim()).filter(Boolean) : ['Grand-Charmont'];
 }
 
+// ── GET articles ─────────────────────────────────────────
 router.get('/', (req, res) => {
   const limit = parseInt(req.query.limit) || 40;
   const q = req.query.unread === 'true'
@@ -19,13 +19,13 @@ router.get('/', (req, res) => {
   res.json({ articles: rows, count: rows.length });
 });
 
-// ── GET config (keywords persistants depuis la DB) ───────
+// ── GET config ───────────────────────────────────────────
 router.get('/config', (req, res) => {
   const keywords = getKeywords().join(',');
   res.json({ keywords });
 });
 
-// ── PUT config (sauvegarde en DB) ───────────────────────
+// ── PUT config ───────────────────────────────────────────
 router.put('/config', (req, res) => {
   const { keywords } = req.body;
   if (!keywords?.trim()) return res.status(400).json({ error: '"keywords" requis' });
@@ -33,59 +33,97 @@ router.put('/config', (req, res) => {
   res.json({ success: true, keywords: keywords.trim() });
 });
 
+// ── POST refresh ─────────────────────────────────────────
 router.post('/refresh', async (req, res) => {
   const db = getDb();
   const keywords = getKeywords();
-  const cityRow   = db.prepare("SELECT value FROM config WHERE key='radio_city'").get();
-  const regionRow = db.prepare("SELECT value FROM config WHERE key='radio_region'").get();
 
   try {
     const articles = await fetchNewsArticles(keywords);
-    const filtered = preFilter(articles, keywords).slice(0, 20);
-    if (!filtered.length) return res.json({ message: 'Aucun article', articles: [] });
+    const filtered = preFilter(articles, keywords).slice(0, 30);
 
-    const analysis = await analyzeNewsArticles(filtered, {
-      city:   cityRow?.value   || 'Grand-Charmont',
-      region: regionRow?.value || 'Nord-Franche-Comté'
-    });
+    if (!filtered.length) {
+      const existing = db.prepare('SELECT * FROM veille_articles ORDER BY created_at DESC LIMIT 40').all();
+      return res.json({ new_articles: 0, total: 0, daily_summary: '', articles: existing });
+    }
 
-    const selectedIdx = new Set((analysis.selected || []).map(s => s.index - 1));
-    const ins = db.prepare('INSERT OR IGNORE INTO veille_articles(id,title,link,source,published_at,summary,relevance_score,emission_idea) VALUES(?,?,?,?,?,?,?,?)');
+    const ins = db.prepare(`
+      INSERT OR IGNORE INTO veille_articles(id, title, link, source, published_at, summary, relevance_score)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
 
     let newCount = 0;
-    filtered.forEach((a, i) => {
-      const ai = (analysis.selected || []).find(s => s.index - 1 === i);
-      const r  = ins.run(a.id, a.title, a.link, a.source, a.pubDate, a.content?.slice(0,500)||'', ai?.relevance_score||10, ai?.emission_idea||null);
+    for (const a of filtered) {
+      const r = ins.run(
+        a.id,
+        a.title,
+        a.link,
+        a.source,
+        a.pubDate,
+        a.content?.slice(0, 500) || '',
+        50
+      );
       if (r.changes > 0) newCount++;
+    }
+
+    // Toujours relire la DB complète après insertion
+    const allArticles = db.prepare('SELECT * FROM veille_articles ORDER BY created_at DESC LIMIT 40').all();
+
+    res.json({
+      new_articles: newCount,
+      total: articles.length,
+      daily_summary: '',
+      articles: allArticles,
     });
 
-    res.json({ new_articles: newCount, total: articles.length, daily_summary: analysis.daily_summary || '', articles: filtered.filter((_, i) => selectedIdx.has(i)) });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('Veille refresh error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
+// ── POST idée d'émission ─────────────────────────────────
 router.post('/:id/idea', async (req, res) => {
+  const { generate } = require('../services/groq');
   const a = getDb().prepare('SELECT * FROM veille_articles WHERE id=?').get(req.params.id);
   if (!a) return res.status(404).json({ error: 'Introuvable' });
 
   try {
     const raw = await generate(`Tu es directeur éditorial de Radio Amitié 99.2 FM (Grand-Charmont).
-Article : "${a.title}" — ${a.summary||''}
+Article : "${a.title}" — ${a.summary || ''}
 Génère uniquement ce JSON (sans markdown) :
 {"emission_title":"...","angle":"...","questions":["...","...","..."],"ideal_guest":"..."}`);
 
     let idea;
     try {
       const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
-      idea = JSON.parse(raw.slice(s, e+1));
-    } catch { idea = { emission_title: a.title, angle: raw }; }
+      idea = JSON.parse(raw.slice(s, e + 1));
+    } catch {
+      idea = { emission_title: a.title, angle: raw };
+    }
 
     getDb().prepare('UPDATE veille_articles SET emission_idea=?,is_read=1 WHERE id=?').run(JSON.stringify(idea), a.id);
     res.json(idea);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
+// ── PUT marquer comme lu ─────────────────────────────────
 router.put('/:id/read', (req, res) => {
   getDb().prepare('UPDATE veille_articles SET is_read=1 WHERE id=?').run(req.params.id);
+  res.json({ success: true });
+});
+
+// ── DELETE un article ────────────────────────────────────
+router.delete('/:id', (req, res) => {
+  getDb().prepare('DELETE FROM veille_articles WHERE id=?').run(req.params.id);
+  res.json({ success: true });
+});
+
+// ── DELETE tout l'historique ─────────────────────────────
+router.delete('/', (req, res) => {
+  getDb().prepare('DELETE FROM veille_articles').run();
   res.json({ success: true });
 });
 

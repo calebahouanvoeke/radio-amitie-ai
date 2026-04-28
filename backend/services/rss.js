@@ -36,8 +36,7 @@ async function fetchFeed(source, retries = 2) {
     try {
       const feed = await parser.parseURL(source.url);
       return feed.items.slice(0, 10).map(item => ({
-        id: Buffer.from((item.link || item.title || '') + source.name).toString('base64').slice(0, 40),
-        title: (item.title || '').replace(/ [-–|].*$/, '').trim(),
+        id: require('crypto').createHash('md5').update((item.link || item.title || '') + source.name).digest('hex'),        title: (item.title || '').replace(/ [-–|].*$/, '').trim(),
         link: item.link || '',
         source: source.name,
         keyword: source.keyword || 'général',

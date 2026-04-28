@@ -7,8 +7,10 @@ const { initDatabase } = require('./db/database');
 const scheduler = require('./services/scheduler');
 
 const app  = express();
+app.set('trust proxy', 1)
 const PORT = process.env.PORT || 3001;
-
+// Route health check (avant les autres routes)
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }))
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -38,6 +40,10 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message });
 });
 
+
+
+
+
 async function start() {
   const db = await initDatabase();
   scheduler.init(db);
@@ -48,5 +54,16 @@ async function start() {
     console.log(`\n🎙️  Radio Amitié — Centre IA v2.0`);
     console.log(`✅  http://localhost:${PORT}\n`);
   });
+
+  // Après app.listen()
+function keepAlive() {
+  const url = process.env.APP_BASE_URL
+  if (!url || process.env.NODE_ENV !== 'production') return
+  setInterval(async () => {
+    try { await fetch(`${url}/api/health`); console.log('🏓 Keep-alive OK') }
+    catch (e) { console.warn('🏓 Keep-alive failed:', e.message) }
+  }, 14 * 60 * 1000)
+}
+keepAlive()
 }
 start();

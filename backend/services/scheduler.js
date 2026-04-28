@@ -43,6 +43,7 @@ async function dispatchPost(post) {
         const r = await publishToAccount(conn, { text: post.content_text, image_path: post.image_path });
         results[key] = r;
       } catch (err) {
+        console.error(`❌ Publish error [${key}]:`, err.message);
         results[key] = { success: false, error: err.message };
       }
     }
