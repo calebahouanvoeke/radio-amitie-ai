@@ -1,9 +1,15 @@
 const ffmpeg = require('fluent-ffmpeg');
-const ffmpegPath = require('ffmpeg-static');
+const ffmpegStatic = require('ffmpeg-static');
 const path = require('path');
 const fs = require('fs');
 
-ffmpeg.setFfmpegPath(ffmpegPath); // on pointe vers le binaire npm
+// Sur Linux (Render) on utilise le ffmpeg système, sur Windows ffmpeg-static
+const ffmpegPath = process.platform === 'linux'
+  ? '/usr/bin/ffmpeg'
+  : ffmpegStatic;
+
+console.log(`🎬 ffmpeg path : ${ffmpegPath}`);
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 const LIMITE_BYTES = 25 * 1024 * 1024;
 
@@ -37,7 +43,7 @@ async function compresserSiNecessaire(filePath) {
 function compresser(entree, sortie, bitrate) {
   return new Promise((resolve, reject) => {
     ffmpeg(entree)
-      .outputOptions('-threads', '0')  // ← tous les cœurs CPU
+      .outputOptions('-threads', '0')
       .audioChannels(1)
       .audioFrequency(16000)
       .audioBitrate(bitrate)
