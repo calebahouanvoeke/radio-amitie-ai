@@ -8,7 +8,7 @@ import Social        from './pages/Social.jsx'
 import Veille        from './pages/Veille.jsx'
 import Audience      from './pages/Audience.jsx'
 import Chatbot       from './pages/Chatbot.jsx'
-import Visuals       from './pages/Visuals.jsx'
+//import Visuals       from './pages/Visuals.jsx'
 import Publisher     from './pages/Publisher.jsx'
 import Connections   from './pages/Connections.jsx'
 
@@ -21,7 +21,7 @@ const NAV = [
   { to: '/veille',                   Icon: Newspaper,       label: 'Veille locale'   },
   { to: '/audience',                 Icon: BarChart3,       label: 'Audience'        },
   { to: '/chatbot',                  Icon: Bot,             label: 'Chatbot'         },
-  { to: '/visuals',                  Icon: ImagePlus,       label: 'Visuels IA'      },
+  /* { to: '/visuals',                  Icon: ImagePlus,       label: 'Visuels IA'      }, */ 
 ]
 
 export default function App() {
@@ -72,7 +72,7 @@ export default function App() {
           <Route path="/veille"        element={<Veille />}        />
           <Route path="/audience"      element={<Audience />}      />
           <Route path="/chatbot"       element={<Chatbot />}       />
-          <Route path="/visuals"       element={<Visuals />}       />
+        {/*  <Route path="/visuals"       element={<Visuals />}       />*/}
           <Route path="/publisher"     element={<Publisher />}     />
           <Route path="/connections"   element={<Connections />}   />
         </Routes>

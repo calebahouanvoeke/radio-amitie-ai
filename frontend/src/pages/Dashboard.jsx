@@ -47,14 +47,14 @@ const MODULES = [
     accent: '#18181b',
     tag: 'IA'
   },
-  {
+ /* {
     to: '/visuals',
     Icon: ImagePlus,
     label: 'Visuels IA',
     desc: 'Affiches et bannières',
     accent: '#18181b',
     tag: 'Génératif'
-  },
+  },*/
 ]
 
 export default function Dashboard() {

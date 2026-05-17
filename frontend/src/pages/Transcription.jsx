@@ -145,9 +145,7 @@ export default function Transcription() {
   async function handleUpload(e) {
     e.preventDefault()
     if (!file) return setError('Sélectionnez un fichier audio')
-    if (file.size > 25 * 1024 * 1024) {
-      return setError(`Fichier trop volumineux (${(file.size / 1024 / 1024).toFixed(1)} Mo). Maximum 25 Mo.`)
-    }
+
     const form = new FormData()
     form.append('audio', file)
     if (title) form.append('emission_title', title)
@@ -251,9 +249,9 @@ export default function Transcription() {
                     <p className="text-sm text-zinc-600 font-medium">
                       {file ? file.name : 'Cliquez ou glissez'}
                     </p>
-                    <p className="text-xs text-zinc-400 mt-0.5">
-                      {file ? `${(file.size / 1024 / 1024).toFixed(1)} Mo` : 'MP3, WAV, M4A — 25 Mo max'}
-                    </p>
+<p className="text-xs text-zinc-400 mt-0.5">
+  {file ? `${(file.size / 1024 / 1024).toFixed(1)} Mo` : 'MP3, WAV, M4A — Toute taille acceptée'}
+</p>
                   </div>
                   <input ref={fileRef} type="file" className="hidden"
                     accept=".mp3,.wav,.m4a,.ogg,.flac,.mp4"

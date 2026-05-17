@@ -1,4 +1,5 @@
-require('dotenv').config();
+require('dotenv').config()
+console.log('GROQ KEY:', process.env.GROQ_API_KEY ? '✅ chargée' : '❌ undefined')
 const express      = require('express');
 const cors         = require('cors');
 const path         = require('path');
