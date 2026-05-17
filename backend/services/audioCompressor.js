@@ -1,5 +1,5 @@
 const ffmpeg = require('fluent-ffmpeg');
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; // ← binaire embarqué
+const ffmpegPath = require('ffmpeg-static');
 const path = require('path');
 const fs = require('fs');
 
