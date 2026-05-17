@@ -250,7 +250,7 @@ export default function Transcription() {
                       {file ? file.name : 'Cliquez ou glissez'}
                     </p>
 <p className="text-xs text-zinc-400 mt-0.5">
-  {file ? `${(file.size / 1024 / 1024).toFixed(1)} Mo` : 'MP3, WAV, M4A — Toute taille acceptée'}
+  {file ? `${(file.size / 1024 / 1024).toFixed(1)} Mo` :'MP3, WAV, M4A — 500 Mo max (compression automatique)'}
 </p>
                   </div>
                   <input ref={fileRef} type="file" className="hidden"

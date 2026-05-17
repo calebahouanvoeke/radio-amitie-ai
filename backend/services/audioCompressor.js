@@ -37,9 +37,10 @@ async function compresserSiNecessaire(filePath) {
 function compresser(entree, sortie, bitrate) {
   return new Promise((resolve, reject) => {
     ffmpeg(entree)
-      .audioChannels(1)        // mono
-      .audioFrequency(16000)   // 16 kHz, optimal pour Whisper
-      .audioBitrate(bitrate)   // 64k ou 32k
+      .outputOptions('-threads', '0')  // ← tous les cœurs CPU
+      .audioChannels(1)
+      .audioFrequency(16000)
+      .audioBitrate(bitrate)
       .format('mp3')
       .on('end', () => resolve(sortie))
       .on('error', (err) => reject(new Error(`Compression échouée : ${err.message}`)))

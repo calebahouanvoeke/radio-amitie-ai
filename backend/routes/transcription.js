@@ -16,7 +16,7 @@ const upload = multer({
     destination: (_, __, cb) => cb(null, UPLOAD_DIR),
     filename:    (_, f, cb)  => cb(null, `audio_${Date.now()}${path.extname(f.originalname)}`)
   }),
-  limits: { fileSize: 150 * 1024 * 1024 },
+  limits: { fileSize: 500 * 1024 * 1024 }, // 500 Mo max — au-delà ça n'a pas de sens pour Whisper
   fileFilter: (_, f, cb) => {
     const ok = ['.mp3','.wav','.m4a','.ogg','.flac','.mp4'];
     ok.includes(path.extname(f.originalname).toLowerCase()) ? cb(null, true) : cb(new Error('Format non supporté'));
