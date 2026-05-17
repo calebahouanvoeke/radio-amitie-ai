@@ -427,14 +427,7 @@ export default function Publisher() {
               }
             </button>
 
-            {/* Note Facebook uniquement */}
-            <div className="card-p bg-amber-50 border-amber-100">
-              <p className="text-xs text-amber-700 leading-relaxed">
-                <strong>Note :</strong> La publication automatique fonctionne sur <strong>Facebook</strong> (si <code>FACEBOOK_PAGE_TOKEN</code> configuré).
-                Pour Instagram, X/Twitter et LinkedIn, les textes sont générés et vous pouvez les copier avec le bouton dédié.
-                La publication multi-plateformes complète requiert des accès API approuvés par chaque réseau social.
-              </p>
-            </div>
+           
           </div>
 
           {/* Aperçu — 1/3 */}

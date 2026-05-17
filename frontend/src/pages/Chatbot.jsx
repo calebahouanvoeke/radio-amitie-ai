@@ -162,12 +162,7 @@ export default function Chatbot() {
             </div>
           )}
 
-          <div className="card-p mt-4 border-l-2 border-amber-300">
-            <p className="text-xs font-semibold text-zinc-600 mb-2">Intégration Messenger</p>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Configurez <code className="bg-zinc-100 px-1 py-0.5 rounded text-[10px]">FACEBOOK_PAGE_TOKEN</code> dans le fichier <code className="bg-zinc-100 px-1 py-0.5 rounded text-[10px]">.env</code> pour activer les réponses automatiques sur Messenger.
-            </p>
-          </div>
+
         </div>
       </div>
     </div>
