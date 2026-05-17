@@ -1,15 +1,33 @@
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegStatic = require('ffmpeg-static');
+const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-// Sur Linux (Render) on utilise le ffmpeg système, sur Windows ffmpeg-static
-const ffmpegPath = process.platform === 'linux'
-  ? '/usr/bin/ffmpeg'
-  : ffmpegStatic;
+function resolveFfmpegPath() {
+  // 1. Cherche ffmpeg dans le PATH système (souvent présent sur Render)
+  try {
+    const p = execSync('which ffmpeg 2>/dev/null || command -v ffmpeg 2>/dev/null')
+      .toString().trim();
+    if (p) { console.log(`🎬 ffmpeg système trouvé : ${p}`); return p; }
+  } catch (_) {}
 
-console.log(`🎬 ffmpeg path : ${ffmpegPath}`);
-ffmpeg.setFfmpegPath(ffmpegPath);
+  // 2. Chemins connus sur les serveurs Linux
+  const knownPaths = [
+    '/usr/bin/ffmpeg',
+    '/usr/local/bin/ffmpeg',
+    '/bin/ffmpeg',
+  ];
+  for (const p of knownPaths) {
+    if (fs.existsSync(p)) { console.log(`🎬 ffmpeg trouvé : ${p}`); return p; }
+  }
+
+  // 3. Fallback ffmpeg-static (local Windows)
+  console.log(`🎬 ffmpeg-static : ${ffmpegStatic}`);
+  return ffmpegStatic;
+}
+
+ffmpeg.setFfmpegPath(resolveFfmpegPath());
 
 const LIMITE_BYTES = 25 * 1024 * 1024;
 
